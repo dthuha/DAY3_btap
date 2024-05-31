@@ -1,3 +1,4 @@
+-- hackerrank
 -- ex1
 select name from city where population >120000 and countrycode = 'USA'
 -- ex2
@@ -22,3 +23,21 @@ SELECT DISTINCT CITY FROM STATION WHERE NOT (LEFT (CITY,1) IN ('A', 'E', 'I', 'O
 select name from employee ORDER BY name
   -- Employee Salaries
 select name from employee where salary >2000 and months <10 order by employee_id
+
+-- leetcode
+-- recyclable and low fat products
+select product_id from  Products where low_fats = 'Y' AND recyclable = 'Y'
+-- find customer id
+select name from customer where referee_id !=2 or referee_id is null
+-- big countries
+select name, population, area from world where area >=3000000 or population >=25000000
+-- acticles views I
+select distinct author_id as id from views where viewer_id = author_id order by author_id
+
+-- datalemur
+-- tesla unfinished parts
+SELECT part, assembly_step FROM parts_assembly where finish_date is null
+-- lyft driver
+SELECT * FROM lyft_drivers WHERE yearly_salary <= 30000 OR yearly_salary >= 70000
+-- advertising channel
+select advertising_channel from uber_advertising where money_spent >100000 and year = '2019'
