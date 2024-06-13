@@ -22,7 +22,7 @@ ROUND(CAST(SUM(
 CASE
 WHEN call_category = 'n/a' or call_category is null THEN 1
 ELSE 0
-END) AS DECIMAL)
+END) AS DECIMAL) -- bdau kqua ra 0 => nghĩ đến vc dùng CAST AS DECIMAL
 / COUNT(case_id)*100,1) AS uncategorised_call_pct
 FROM callers
 --- Find Customer Referee
