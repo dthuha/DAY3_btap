@@ -17,7 +17,14 @@ ELSE 'No'
 END triangle
 FROM TRIANGLE
 --- Patient Support Analysis (Part 2) [UnitedHealth SQL Interview Question]
-
+SELECT
+ROUND(CAST(SUM(
+CASE
+WHEN call_category = 'n/a' or call_category is null THEN 1
+ELSE 0
+END) AS DECIMAL)
+/ COUNT(case_id)*100,1) AS uncategorised_call_pct
+FROM callers
 --- Find Customer Referee
 select name from customer where referee_id !=2 or referee_id is null
 --- Make a report showing the number of survivors and non-survivors by passenger class
