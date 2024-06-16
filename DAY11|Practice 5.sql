@@ -33,7 +33,14 @@ FROM activities AS t1
 INNER JOIN age_breakdown AS t2
 ON t1.user_id=t2.user_id
 GROUP BY t2.age_bucket
--- EX4: 
+-- EX4: Supercloud Customer [Microsoft SQL Interview Question]
+SELECT t1.customer_id
+FROM customer_contracts AS t1
+INNER JOIN products AS t2
+ON t1.product_id=t2.product_id
+WHERE t2.product_category in ('Analytics', 'Containers', 'Compute')
+GROUP BY t1.customer_id
+HAVING COUNT(DISTINCT t2.product_category) = 3
 --- EX5: The Number of Employees Which Report to Each Employee (XEM KĨ)
 SELECT a.employee_id,a.name,
 count(b.reports_to) AS reports_count,
