@@ -33,4 +33,13 @@ FROM activities AS t1
 INNER JOIN age_breakdown AS t2
 ON t1.user_id=t2.user_id
 GROUP BY t2.age_bucket
--- EX4:
+-- EX4: 
+--- EX5:
+SELECT a.employee_id,a.name,
+count(b.reports_to) AS reports_count,
+round(avg(b.age)) AS average_age
+FROM Employees AS a
+INNER JOIN Employees AS b
+ON a.employee_id = b.reports_to
+GROUP BY a.employee_id, a.name
+ORDER BY a.employee_id
