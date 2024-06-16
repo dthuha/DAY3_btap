@@ -99,7 +99,7 @@ ON t1.address_id=t2.address_id
 	
 WHERE t2.customer_id is null;
 
--- 7
+-- B7
 -- nháp
 SELECT * FROM public.address;
 SELECT * FROM public.city WHERE city = 'Cape Coral';
@@ -122,7 +122,7 @@ ON T3.city_id=T4.city_id
 GROUP BY T4.city
 ORDER BY SUM(T1.amount) DESC;
 
--- 8
+-- B8
 -- nháp
 SELECT * FROM public.address;
 SELECT * FROM public.city;
