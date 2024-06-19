@@ -54,7 +54,57 @@ ON t1.page_id=t2.page_id
 WHERE t2.liked_date is NULL
 ORDER BY t1.page_id
 
--- EX5:
+-- EX5: Active User Retention [Facebook SQL Interview Question]
+-- bản fix cứng
+SELECT 7 AS mth, COUNT(DISTINCT t1.user_id) AS monthly_active_users FROM
+
+(SELECT user_id
+FROM user_actions
+WHERE EXTRACT(MONTH FROM event_date) = 6 AND
+EXTRACT(YEARS FROM event_date) = 2022) AS t1
+
+JOIN
+
+(SELECT user_id
+FROM user_actions
+WHERE EXTRACT(MONTH FROM event_date) = 7 AND
+EXTRACT(YEARS FROM event_date) = 2022) AS t2
+
+ON t1.user_id=t2.user_id
+
+-- BẢN ĐẦY ĐỦ
+WITH current_month AS 
+(SELECT EXTRACT(month FROM event_date) AS curr_month
+ FROM user_actions
+ ORDER BY EXTRACT(month FROM event_date) DESC limit 1),--- lấy ra tháng hiện tại 
+
+before_month AS 
+(SELECT EXTRACT(month FROM event_date) - 1 AS bef_month
+ FROM user_actions
+ ORDER BY EXTRACT(month FROM event_date) DESC limit 1),--- lấy ra tháng trước
+
+user_active_current_month AS 
+(SELECT DISTINCT user_id
+ FROM user_actions
+ WHERE EXTRACT(month FROM event_date) 
+= 
+(SELECT curr_month
+FROM current_month)),--- lấy ra user hoạt động tháng này
+
+user_active_before_month AS 
+(SELECT DISTINCT user_id
+FROM user_actions
+WHERE EXTRACT(month FROM event_date) 
+= 
+(SELECT bef_month
+FROM before_month)) -- lấy ra user hoạt động tháng trước 
+
+SELECT 
+(SELECT curr_month FROM current_month) AS month,
+count(*) AS monthly_active_users
+FROM user_active_current_month AS a
+JOIN user_active_before_month AS b 
+ON a.user_id = b.user_id
   
 -- EX6: Monthly Transactions I
 select  
