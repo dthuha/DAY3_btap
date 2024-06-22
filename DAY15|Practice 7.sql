@@ -6,7 +6,6 @@ product_id,
 spend AS curr_year_spend,
 LAG(spend) OVER (PARTITION BY product_id ORDER BY product_id, EXTRACT(YEAR FROM transaction_date)) AS prev_year_spend,
 ROUND((spend - LAG(spend) OVER (PARTITION BY product_id ORDER BY product_id, EXTRACT(YEAR FROM transaction_date))) --- WINDOW FUNCTION đi dc với EXTRACT
-/
 LAG(spend) OVER (PARTITION BY product_id ORDER BY product_id, EXTRACT(YEAR FROM transaction_date))
 *100, 2) AS yoy_rate
 FROM user_transactions
@@ -52,6 +51,18 @@ GROUP BY transaction_date, user_id
 WHERE row_num = 3
 
 -- EX5: Tweets' Rolling Averages [Twitter SQL Interview Question]
+/*số lượng tweet trung bình luân phiên trong 3 ngày của mỗi người dùng. 
+Xuất ID người dùng, ngày tweet và giá trị trung bình luân phiên được làm tròn đến 2 chữ số*/
+WITH ABC AS
+(SELECT    
+user_id,    
+tweet_date,
+tweet_count,
+AVG(tweet_count) OVER (PARTITION BY user_id ORDER BY tweet_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rolling_avg
+FROM tweets)
+SELECT user_id, tweet_date,
+ROUND(rolling_avg, 2) AS rolling_avg_3d
+FROM ABC
 
 -- EX 6: Repeated Payments [Stripe SQL Interview Question]
   
