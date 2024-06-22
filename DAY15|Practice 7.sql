@@ -65,7 +65,21 @@ ROUND(rolling_avg, 2) AS rolling_avg_3d
 FROM ABC
 
 -- EX 6: Repeated Payments [Stripe SQL Interview Question]
+WITH ABC AS 
+(SELECT 
+merchant_id,
+credit_card_id,
+amount,
+transaction_timestamp,
+EXTRACT(hour FROM transaction_timestamp - LAG(transaction_timestamp) OVER(PARTITION BY merchant_id, credit_card_id, amount))* 60 
+  + 
+EXTRACT(minute FROM transaction_timestamp - LAG(transaction_timestamp) OVER(PARTITION BY merchant_id, credit_card_id, amount)) 
+AS TIME
+FROM transactions)
   
+SELECT COUNT(*) AS payment_count
+FROM ABC
+WHERE TIME BETWEEN 0 AND 10
 
 -- EX7: Highest-Grossing Items [Amazon SQL Interview Question]
 --2SP CÓ DOANH THU CAO NHẤT trong mỗi category trong 2022
