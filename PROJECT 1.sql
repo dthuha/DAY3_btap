@@ -30,19 +30,19 @@ ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN msrp
 TYPE INT USING (trim(msrp)::INT);
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN productcode
-TYPE VARCHAR USING (trim(productcode)::VARCHAR);
+TYPE VARCHAR USING (trim(productcode)::VARCHAR); -- kcan thiết
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN customername
 TYPE CHAR(100) USING (trim(customername)::CHAR(100));
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN phone
-TYPE VARCHAR USING (trim(phone)::VARCHAR);
+TYPE VARCHAR USING (trim(phone)::VARCHAR); -- kcan thiết
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN addressline1
-TYPE VARCHAR USING (trim(addressline1)::VARCHAR);
+TYPE VARCHAR USING (trim(addressline1)::VARCHAR); -- kcan thiết
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN addressline2
-TYPE VARCHAR USING (trim(addressline2)::VARCHAR);
+TYPE VARCHAR USING (trim(addressline2)::VARCHAR); -- kcan thiết
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN city
 TYPE CHAR(50) USING (trim(city)::CHAR(50));
@@ -51,7 +51,7 @@ ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN state
 TYPE CHAR(50) USING (trim(state)::CHAR(50));
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN postalcode
-TYPE VARCHAR USING (trim(postalcode)::VARCHAR);
+TYPE VARCHAR USING (trim(postalcode)::VARCHAR); -- kcan thiết
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN country
 TYPE CHAR(50) USING (country)::CHAR(50);
@@ -60,7 +60,7 @@ ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN territory
 TYPE CHAR(50) USING (trim(territory)::CHAR(50));
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN contactfullname
-TYPE VARCHAR USING (trim(contactfullname)::VARCHAR);
+TYPE VARCHAR USING (trim(contactfullname)::VARCHAR); -- kcan thiết
 
 ALTER TABLE public.sales_dataset_rfm_prj ALTER COLUMN dealsize
 TYPE CHAR(50) USING (trim(dealsize)::CHAR(50));
@@ -128,6 +128,11 @@ WHEN MONTH_ID BETWEEN 10 AND 12 THEN 4
 END
 ;
 
+UPDATE public.sales_dataset_rfm_prj
+SET MONTH_ID = EXTRACT(MONTH FROM orderdate),
+	YEAR_ID = EXTRACT(YEAR FROM orderdate),
+	QTR_ID = EXTRACT(QUARTER FROM orderdate)
+;
 
 -- 5, OUTLIER
 --- 5.1, CÁCH 1: BOXPLOT
@@ -163,12 +168,20 @@ FROM public.sales_dataset_rfm_prj) AS AVG_1,
 (SELECT 
 	STDDEV(quantityordered)
 FROM public.sales_dataset_rfm_prj) AS STDDEV_1
-FROM public.sales_dataset_rfm_prj)
+FROM public.sales_dataset_rfm_prj),
 	
-SELECT ordernumber, quantityordered,
+	TWT_OUTLIER AS
+(SELECT ordernumber, quantityordered,
 	(quantityordered - AVG_1)/STDDEV_1 AS Z_SCORE
 FROM CTE
-WHERE ABS((quantityordered - AVG_1)/STDDEV_1) >3
+WHERE ABS((quantityordered - AVG_1)/STDDEV_1) >3)
+
+-- xoá outliers
+DELETE FROM public.sales_dataset_rfm_prj
+WHERE quantityordered IN(SELECT quantityordered FROM TWT_OUTLIER)
 
 
 -- 6, ĐỔI TÊN BẢNG
+CREATE TABLE SALES_DATASET_RFM_PRJ_CLEAN AS
+SELECT *
+FROM public.sales_dataset_rfm_prj;
