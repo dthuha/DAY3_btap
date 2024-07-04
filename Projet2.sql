@@ -59,7 +59,33 @@ FROM
 WHERE
     youngest_rank = 1 OR oldest_rank = 1
 ORDER BY
-    gender, tag;
+    gender, tag
 
 -- 4
+Select * from 
+(With monthly_profit as
+(Select 
+  CAST(FORMAT_DATE('%Y-%m', t1.delivered_at) AS STRING) as month_year,
+  t1.product_id as product_id,
+  t2.name as product_name,
+  round(sum(t1.sale_price),2) as sales,
+  round(sum(t2.cost),2) as cost,
+  round(sum(t1.sale_price)-sum(t2.cost),2)  as profit
+from bigquery-public-data.thelook_ecommerce.order_items as t1
+Join bigquery-public-data.thelook_ecommerce.products as t2 
+on t1.product_id=t2.id
+Where t1.status='Complete'
+Group by 
+month_year,
+t1.product_id, 
+t2.name)
+
+
+Select * ,
+dense_rank() OVER ( PARTITION BY month_year ORDER BY month_year,profit) as rank from onthly_profit) as rank_table
+Where rank_table.rank <= 5
+order by rank_table.month_year
+
+-- 5
+
 
