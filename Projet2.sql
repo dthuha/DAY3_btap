@@ -87,5 +87,26 @@ Where rank_table.rank <= 5
 order by rank_table.month_year
 
 -- 5
+SELECT
+    DATE(A.created_at) AS dates,
+    C.category AS product_categories,
+    ROUND(SUM(B.sale_price)) AS revenue
+FROM
+    bigquery-public-data.thelook_ecommerce.orders AS A
+JOIN
+    bigquery-public-data.thelook_ecommerce.order_items AS B 
+    ON A.order_id = B.order_id
+JOIN
+    bigquery-public-data.thelook_ecommerce.products AS C 
+    ON B.id = C.id
+WHERE
+    A.status = 'Complete'
+    AND A.created_at >= '2022-01-15'
+    AND A.created_at <= '2022-04-15'
+GROUP BY
+    DATE(A.created_at),
+    C.category
+ORDER BY
+    revenue DESC
 
 
