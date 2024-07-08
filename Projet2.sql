@@ -1,3 +1,4 @@
+--- PART 1
 -- 1
 SELECT
 FORMAT_DATE('%Y-%m', B.delivered_at) AS month,
@@ -110,3 +111,40 @@ ORDER BY
     revenue DESC
 
 
+
+
+
+
+
+-- PART 2
+-- 1
+WITH ABC AS
+(SELECT
+FORMAT_DATE('%m', B.delivered_at) AS month,
+FORMAT_DATE('%Y', B.delivered_at) AS year,
+C.category AS Product_category,
+SUM(A.sale_price) AS TPV,
+COUNT(DISTINCT A.order_id) AS TPO,
+SUM(C.cost) AS Total_cost,
+SUM(A.sale_price) - SUM(C.cost) AS Total_profit,
+(SUM(A.sale_price) - SUM(C.cost))/SUM(C.cost) AS Profit_to_cost_ratio
+FROM bigquery-public-data.thelook_ecommerce.order_items AS A
+JOIN bigquery-public-data.thelook_ecommerce.orders AS B
+ON A.order_id= B.order_id
+JOIN bigquery-public-data.thelook_ecommerce.products AS C
+ON A.id=C.id
+GROUP BY FORMAT_DATE('%m', B.delivered_at),
+FORMAT_DATE('%Y', B.delivered_at),
+C.category
+ORDER BY year, month)
+        
+SELECT 
+*,
+
+ROUND((ABC.TPV - LAG(ABC.TPV) OVER(PARTITION BY ABC.Product_category ORDER BY ABC.month, ABC.year))
+/LAG(ABC.TPV) OVER(PARTITION BY ABC.Product_category ORDER BY ABC.month, ABC.year), 2)||'%' AS Revenue_growth,
+
+ROUND((ABC.TPO - LAG(ABC.TPO) OVER(PARTITION BY ABC.Product_category ORDER BY ABC.month, ABC.year))
+/LAG(ABC.TPO) OVER(PARTITION BY ABC.Product_category ORDER BY ABC.month, ABC.year), 2) ||'%' AS Order_growth
+FROM ABC
+WHERE ABC.month is not null and ABC.year is not null
