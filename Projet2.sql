@@ -150,7 +150,7 @@ FROM ABC
 WHERE ABC.month is not null and ABC.year is not null
 
 -- 2
-WITH ONLINE_RETAIL_INDEX AS
+	WITH ONLINE_RETAIL_INDEX AS
 (SELECT 
 customer_id, 
 amount,
@@ -176,7 +176,8 @@ index,
 COUNT(DISTINCT customer_id) AS cnt,
 SUM(amount) AS revenue 
 FROM ONLINE_RETAIL_INDEX
-GROUP BY cohort_date, index)
+GROUP BY cohort_date, index
+)
 
 ,
 
@@ -196,7 +197,8 @@ CUSTOMER_COHORT AS
 	SUM((CASE WHEN INDEX = 12 THEN CNT ELSE 0 END)) AS M_12,
 	SUM((CASE WHEN INDEX = 13 THEN CNT ELSE 0 END)) AS M_13
 FROM ABC
-GROUP BY COHORT_DATE)
+GROUP BY COHORT_DATE
+ORDER BY cohort_date)
 
 SELECT
 	COHORT_DATE,
@@ -214,3 +216,4 @@ SELECT
 	ROUND(100.00 * M_12/M_1, 2) || '%' AS M_12,
 	ROUND(100.00 * M_13/M_1, 2) || '%' AS M_13	
 FROM CUSTOMER_COHORT
+
