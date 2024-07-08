@@ -148,3 +148,69 @@ ROUND((ABC.TPO - LAG(ABC.TPO) OVER(PARTITION BY ABC.Product_category ORDER BY AB
 /LAG(ABC.TPO) OVER(PARTITION BY ABC.Product_category ORDER BY ABC.month, ABC.year), 2) ||'%' AS Order_growth
 FROM ABC
 WHERE ABC.month is not null and ABC.year is not null
+
+-- 2
+WITH ONLINE_RETAIL_INDEX AS
+(SELECT 
+customer_id, 
+amount,
+FORMAT_DATE('%Y-%m', first_purchase_date) AS cohort_date,
+date,
+(EXTRACT(YEAR FROM date) - EXTRACT(YEAR FROM first_purchase_date))*12
++ 
+(EXTRACT(MONTH FROM date) - EXTRACT(MONTH FROM first_purchase_date))
++ 1 AS INDEX
+FROM
+(SELECT 
+A.user_id AS customer_id, 
+A.created_at AS date,
+SUM(B.sale_price) OVER(PARTITION BY A.user_id) AS amount,
+MIN(A.created_at) OVER(PARTITION BY A.user_id) AS first_purchase_date
+FROM bigquery-public-data.thelook_ecommerce.orders AS A
+JOIN bigquery-public-data.thelook_ecommerce.order_items AS B
+ON A.order_id=B.order_id) A),
+ABC AS
+(SELECT 
+cohort_date, 
+index,
+COUNT(DISTINCT customer_id) AS cnt,
+SUM(amount) AS revenue 
+FROM ONLINE_RETAIL_INDEX
+GROUP BY cohort_date, index)
+
+,
+
+CUSTOMER_COHORT AS
+(SELECT cohort_date,
+  SUM((CASE WHEN INDEX = 1 THEN CNT ELSE 0 END)) AS M_1,
+	SUM((CASE WHEN INDEX = 2 THEN CNT ELSE 0 END)) AS M_2,
+	SUM((CASE WHEN INDEX = 3 THEN CNT ELSE 0 END)) AS M_3,
+	SUM((CASE WHEN INDEX = 4 THEN CNT ELSE 0 END)) AS M_4,
+	SUM((CASE WHEN INDEX = 5 THEN CNT ELSE 0 END)) AS M_5,
+	SUM((CASE WHEN INDEX = 6 THEN CNT ELSE 0 END)) AS M_6,
+	SUM((CASE WHEN INDEX = 7 THEN CNT ELSE 0 END)) AS M_7,
+	SUM((CASE WHEN INDEX = 8 THEN CNT ELSE 0 END)) AS M_8,
+	SUM((CASE WHEN INDEX = 9 THEN CNT ELSE 0 END)) AS M_9,
+	SUM((CASE WHEN INDEX = 10 THEN CNT ELSE 0 END)) AS M_10,
+	SUM((CASE WHEN INDEX = 11 THEN CNT ELSE 0 END)) AS M_11,
+	SUM((CASE WHEN INDEX = 12 THEN CNT ELSE 0 END)) AS M_12,
+	SUM((CASE WHEN INDEX = 13 THEN CNT ELSE 0 END)) AS M_13
+FROM ABC
+GROUP BY COHORT_DATE)
+
+SELECT
+	COHORT_DATE,
+	ROUND(100.00 * M_1/M_1, 2) || '%' AS M_1,
+	ROUND(100.00 * M_2/M_1, 2) || '%' AS M_2,
+	ROUND(100.00 * M_3/M_1, 2) || '%' AS M_3,
+	ROUND(100.00 * M_4/M_1, 2) || '%' AS M_4,
+	ROUND(100.00 * M_5/M_1, 2) || '%' AS M_5,
+	ROUND(100.00 * M_6/M_1, 2) || '%' AS M_6,
+	ROUND(100.00 * M_7/M_1, 2) || '%' AS M_7,
+	ROUND(100.00 * M_8/M_1, 2) || '%' AS M_8,
+	ROUND(100.00 * M_9/M_1, 2) || '%' AS M_9,
+	ROUND(100.00 * M_10/M_1, 2) || '%' AS M_10,
+	ROUND(100.00 * M_11/M_1, 2) || '%' AS M_11,
+	ROUND(100.00 * M_12/M_1, 2) || '%' AS M_12,
+	ROUND(100.00 * M_13/M_1, 2) || '%' AS M_13	
+FROM CUSTOMER_COHORT
